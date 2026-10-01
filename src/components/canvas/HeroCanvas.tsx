@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 
 const TOTAL_FRAMES = 50;
 const PRELOAD_COUNT = 10;
