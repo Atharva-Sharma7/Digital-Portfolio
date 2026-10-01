@@ -2,26 +2,171 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Fonts ─────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --font-inter: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --bg:  #05050a;
+  --fg:  #f0f0f5;
+  --muted: #55555f;
+  --cyan: #00f0ff;
+  --violet: #7b2fff;
+  --glow-cyan: rgba(0,240,255,0.35);
+  --glow-violet: rgba(123,47,255,0.35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Reset / base ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: auto; /* Lenis handles it */
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-inter);
+  overflow-x: hidden;
+  cursor: none;           /* custom cursor */
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+/* ─── Hide system cursor everywhere (3D drone replaces it) ──────── */
+*, *::before, *::after,
+html, body, a, button, input, textarea, select,
+[role="button"], .bento-card {
+  cursor: none !important;
 }
+
+
+/* ─── Scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #1a1a2e; border-radius: 2px; }
+
+/* ─── Noise grain overlay ───────────────────────────────────────── */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -200%;
+  width: 400%;
+  height: 400%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.028;
+  pointer-events: none;
+  z-index: 9000;
+  animation: grain 0.5s steps(2) infinite;
+}
+
+@keyframes grain {
+  0%,100% { transform: translate(0,0) }
+  10%      { transform: translate(-2%,-3%) }
+  20%      { transform: translate(-4%,2%) }
+  30%      { transform: translate(2%,-4%) }
+  40%      { transform: translate(-1%,3%) }
+  50%      { transform: translate(3%,-1%) }
+  60%      { transform: translate(4%,2%) }
+  70%      { transform: translate(-3%,4%) }
+  80%      { transform: translate(-4%,-1%) }
+  90%      { transform: translate(1%,-2%) }
+}
+
+/* ─── Scanline overlay ──────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 8999;
+}
+
+/* ─── Utility: text glow ────────────────────────────────────────── */
+.text-glow-cyan {
+  text-shadow: 0 0 20px var(--glow-cyan), 0 0 60px var(--glow-cyan);
+}
+
+.text-glow-violet {
+  text-shadow: 0 0 20px var(--glow-violet), 0 0 60px var(--glow-violet);
+}
+
+/* ─── Glass panel ───────────────────────────────────────────────── */
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(24px) saturate(1.6);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+/* ─── Reveal animation ──────────────────────────────────────────── */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.9s cubic-bezier(0.16,1,0.3,1),
+              transform 0.9s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ─── Gradient text ─────────────────────────────────────────────── */
+.grad-text {
+  background: linear-gradient(135deg, var(--cyan) 0%, var(--violet) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Bento card hover glow ─────────────────────────────────────── */
+.bento-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.bento-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(0, 240, 255, 0.06),
+    transparent 50%
+  );
+  z-index: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+  opacity: 0;
+}
+
+.bento-card:hover::before { opacity: 1; }
+
+/* ─── Horizontal scroll ticker ──────────────────────────────────── */
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-track {
+  display: flex;
+  white-space: nowrap;
+  animation: ticker 28s linear infinite;
+}
+
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
+/* ─── Reduced motion ────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+@keyframes shimmer { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
